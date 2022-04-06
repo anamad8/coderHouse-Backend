@@ -1,0 +1,1 @@
+para mi proyecto prefero ejs como motro de plantilla, es el ue me parecio mas facil de entender y mas parecido a html.
