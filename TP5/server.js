@@ -1,9 +1,6 @@
 const express = require('express')
 const app = express()
 
-// Configuracion de Router
-const api = require('./routes/api')
-app.use(api)
 
 //  Configuración de Carpeta Publica 
 app.use(express.static('public'))
@@ -11,6 +8,11 @@ app.use(express.static('public'))
 // Codificación
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// Configuracion de Router
+const api = require('./routes/api')
+app.use(api)
+
 
 // Entorno de Motor de Plantilla
 app.set('view engine', 'ejs')
