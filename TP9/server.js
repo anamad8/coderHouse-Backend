@@ -1,37 +1,32 @@
-const express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-
-const messagesRouter = require('./routes/messages.router');
-const productosTestRouter = require('./routes/productos.test.router');
-const productosRouter = require('./routes/productos.router');
-const productosWebServerRouter = require('./routes/productos.webserver.router');
-
-const socketIo = require('./socket/index');
+import express from 'express';
+import routerProducto from './src/routes/routes.js';
+import { Server as http } from 'http'
+import { Server as ioServer } from 'socket.io'
+import { saveMsjs, getMsjs } from './src/controllers/mensajes.js';
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer);
+const httpserver = http(app)
+const io = new ioServer(httpserver)
 
-app.use( express.json() );
-app.use( express.urlencoded( { extended: true }) );
+app.use(express.static('public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use( express.static('public') );
+app.use('/api/', routerProducto);
 
-app.set('view engine', 'ejs');
+io.on('connection', async (socket) => {
+    console.log('Usuario conectado');
+    socket.on('enviarMensaje', (msj) => {
+        saveMsjs(msj);
+    })
 
-const onConnection = socket => {
-    socketIo(io, socket);
-}
+    socket.emit ('mensajes', await getMsjs());
+})
 
-io.on('connection', onConnection);
+const PORT = process.env.PORT || 8080;
 
-app.use('/api/productos', productosRouter);
+const server = httpserver.listen(PORT, () => {
+    console.log(`Server is running on port: ${server.address().port}`);
+});
+server.on('error', error => console.log(`error running server: ${error}`));
 
-app.use('/productos', productosWebServerRouter);
-
-app.use('/api/productos-test', productosTestRouter);
-
-app.use('/messages', messagesRouter);
-
-module.exports = httpServer;
